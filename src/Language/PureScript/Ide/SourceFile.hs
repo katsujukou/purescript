@@ -83,7 +83,7 @@ extractSpans d = case d of
     [(IdeNamespaced IdeNSValue (P.runOpName opName), ss)]
   P.FixityDeclaration (ss, _) (Right (P.TypeFixity _ _ opName)) ->
     [(IdeNamespaced IdeNSType (P.runOpName opName), ss)]
-  P.ExternDeclaration (ss, _) ident _ ->
+  P.ExternDeclaration (P.ExternDeclarationData (ss, _) ident _) ->
     [(IdeNamespaced IdeNSValue (P.runIdent ident), ss)]
   P.ExternDataDeclaration (ss, _) name _ ->
     [(IdeNamespaced IdeNSType (P.runProperName name), ss)]

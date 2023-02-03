@@ -385,7 +385,7 @@ typeCheckAll moduleName = traverse go
           roles = nominalRolesForKind elabKind
       putEnv $ env { types = M.insert qualName (elabKind, ExternData roles) (types env) }
       return d
-  go d@(ExternDeclaration (ss, _) name ty) = do
+  go d@(ExternDeclaration (ExternDeclarationData (ss, _) name ty)) = do
     warnAndRethrow (addHint (ErrorInForeignImport name) . addHint (positionedError ss)) $ do
       env <- getEnv
       (elabTy, kind) <- withFreshSubstitution $ do

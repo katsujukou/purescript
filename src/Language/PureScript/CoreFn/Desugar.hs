@@ -237,7 +237,7 @@ importToCoreFn _ = Nothing
 
 -- | Desugars foreign declarations from AST to CoreFn representation.
 externToCoreFn :: A.Declaration -> Maybe Ident
-externToCoreFn (A.ExternDeclaration _ name _) = Just name
+externToCoreFn (A.ExternDeclaration (A.ExternDeclarationData _ name _)) = Just name
 externToCoreFn _ = Nothing
 
 -- | Desugars export declarations references from AST to CoreFn representation.

@@ -367,6 +367,12 @@ mapDataCtorFields f DataConstructorDeclaration{..} = DataConstructorDeclaration 
 traverseDataCtorFields :: Monad m => ([(Ident, SourceType)] -> m [(Ident, SourceType)]) -> DataConstructorDeclaration -> m DataConstructorDeclaration
 traverseDataCtorFields f DataConstructorDeclaration{..} = DataConstructorDeclaration dataCtorAnn dataCtorName <$> f dataCtorFields
 
+data ExternDeclarationData = ExternDeclarationData
+  { extdeclAnn :: !SourceAnn
+  , extdeclIdent :: !Ident
+  , extdeclType :: SourceType
+  } deriving (Show, Eq)
+
 -- |
 -- The data type of declarations
 --
@@ -409,7 +415,7 @@ data Declaration
   -- |
   -- A foreign import declaration (name, type)
   --
-  | ExternDeclaration SourceAnn Ident SourceType
+  | ExternDeclaration ExternDeclarationData
   -- |
   -- A data type foreign import (name, kind)
   --
@@ -491,7 +497,7 @@ declSourceAnn (TypeDeclaration td) = tydeclSourceAnn td
 declSourceAnn (ValueDeclaration vd) = valdeclSourceAnn vd
 declSourceAnn (BoundValueDeclaration sa _ _) = sa
 declSourceAnn (BindingGroupDeclaration ds) = let ((sa, _), _, _) = NEL.head ds in sa
-declSourceAnn (ExternDeclaration sa _ _) = sa
+declSourceAnn (ExternDeclaration (ExternDeclarationData sa _ _)) = sa
 declSourceAnn (ExternDataDeclaration sa _ _) = sa
 declSourceAnn (FixityDeclaration sa _) = sa
 declSourceAnn (ImportDeclaration sa _ _ _) = sa
@@ -508,7 +514,7 @@ declName :: Declaration -> Maybe Name
 declName (DataDeclaration _ _ n _ _) = Just (TyName n)
 declName (TypeSynonymDeclaration _ n _ _) = Just (TyName n)
 declName (ValueDeclaration vd) = Just (IdentName (valdeclIdent vd))
-declName (ExternDeclaration _ n _) = Just (IdentName n)
+declName (ExternDeclaration (ExternDeclarationData _ n _)) = Just (IdentName n)
 declName (ExternDataDeclaration _ n _) = Just (TyName n)
 declName (FixityDeclaration _ (Left (ValueFixity _ _ n))) = Just (ValOpName n)
 declName (FixityDeclaration _ (Right (TypeFixity _ _ n))) = Just (TyOpName n)

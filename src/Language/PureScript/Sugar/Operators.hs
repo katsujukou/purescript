@@ -374,8 +374,8 @@ updateTypes goType = (goDecl, goExpr, goBinder)
     DataDeclaration sa ddt name
       <$> traverse (traverse (traverse (goType' ss))) args
       <*> traverse (traverseDataCtorFields (traverse (sndM (goType' ss)))) dctors
-  goDecl (ExternDeclaration sa@(ss, _) name ty) =
-    ExternDeclaration sa name <$> goType' ss ty
+  goDecl (ExternDeclaration (ExternDeclarationData sa@(ss, _) name ty)) =
+    (ExternDeclaration . ExternDeclarationData sa name) <$> goType' ss ty
   goDecl (TypeClassDeclaration sa@(ss, _) name args implies deps decls) = do
     implies' <- traverse (overConstraintArgs (traverse (goType' ss))) implies
     args' <- traverse (traverse (traverse (goType' ss))) args

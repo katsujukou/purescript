@@ -218,9 +218,16 @@ instanceBindingRange = \case
 
 foreignRange :: Foreign a -> TokenRange
 foreignRange = \case
-  ForeignValue (Labeled a _ b) -> (nameTok a, snd $ typeRange b)
+  ForeignValue Nothing (Labeled a _ b) -> (nameTok a, snd $ typeRange b)
+  ForeignValue (Just a) (Labeled _ _ b) -> (fst $ foreignLocRange a, snd $ typeRange b)
   ForeignData a (Labeled _ _ b) -> (a, snd $ typeRange b)
   ForeignKind a b -> (a, nameTok b)
+
+foreignLocRange :: ForeignLocation -> TokenRange
+foreignLocRange = \case 
+  ForeignLocLocal a (b, _) -> (a, b)
+  ForeignLocModule a _ (b, _) -> (a, b)
+  ForeignLocExternal a b -> (a, b)
 
 valueBindingFieldsRange :: ValueBindingFields a -> TokenRange
 valueBindingFieldsRange (ValueBindingFields a _ b) = (nameTok a, snd $ guardedRange b)

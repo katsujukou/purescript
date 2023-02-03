@@ -195,9 +195,15 @@ flattenFixityOp = \case
 
 flattenForeign :: Foreign a -> DList SourceToken
 flattenForeign = \case
-  ForeignValue a -> flattenLabeled flattenName flattenType a
+  ForeignValue a b -> foldMap flattenForeignLoc a <> flattenLabeled flattenName flattenType b
   ForeignData a b -> pure a <> flattenLabeled flattenName flattenType b
   ForeignKind a b -> pure a <> flattenName b
+
+flattenForeignLoc :: ForeignLocation -> DList SourceToken
+flattenForeignLoc = \case
+  ForeignLocLocal a (b, _) -> pure a <> pure b
+  ForeignLocModule a b (c, _) -> pure a <> pure b <> pure c
+  ForeignLocExternal a b -> pure a <> pure  b
 
 flattenRole :: Role -> DList SourceToken
 flattenRole = pure . roleTok

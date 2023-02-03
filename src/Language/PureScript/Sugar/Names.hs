@@ -219,9 +219,9 @@ renameInModule imports (Module modSS coms mn decls exps) =
     fmap (bound,) $
       TypeDeclaration . TypeDeclarationData sa name
         <$> updateTypesEverywhere ty
-  updateDecl bound (ExternDeclaration sa name ty) =
+  updateDecl bound (ExternDeclaration (ExternDeclarationData sa name ty)) =
     fmap (M.insert name (spanStart $ fst sa) bound,) $
-      ExternDeclaration sa name
+      ExternDeclaration . ExternDeclarationData sa name
         <$> updateTypesEverywhere ty
   updateDecl bound (ExternDataDeclaration sa name ki) =
     fmap (bound,) $

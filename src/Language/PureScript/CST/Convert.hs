@@ -525,8 +525,8 @@ convertDeclaration fileName decl = case decl of
         Right $ AST.TypeFixity fixity (qualified name) (nameValue op)
   DeclForeign _ _ _ frn ->
     pure $ case frn of
-      ForeignValue (Labeled a _ b) ->
-        AST.ExternDeclaration ann (ident $ nameValue a) $ convertType fileName b
+      ForeignValue _ (Labeled a _ b) ->
+        AST.ExternDeclaration $ AST.ExternDeclarationData ann (ident $ nameValue a) $ convertType fileName b
       ForeignData _ (Labeled a _ b) ->
         AST.ExternDataDeclaration ann (nameValue a) $ convertType fileName b
       ForeignKind _ a ->

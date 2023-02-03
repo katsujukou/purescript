@@ -25,7 +25,7 @@ import qualified Data.List.NonEmpty as NE
 import Data.Text (Text)
 import Data.Traversable (for, sequence)
 import Language.PureScript.CST.Errors
-import Language.PureScript.CST.Flatten (flattenType)
+import Language.PureScript.CST.Flatten (flattenType, flattenForeignLoc)
 import Language.PureScript.CST.Lexer
 import Language.PureScript.CST.Monad
 import Language.PureScript.CST.Positions
@@ -103,6 +103,7 @@ import Language.PureScript.PSString (PSString)
   'forall'           { SourceToken _ (TokForall ASCII) }
   'forallu'          { SourceToken _ (TokForall Unicode) }
   'foreign'          { SourceToken _ (TokLowerName [] "foreign") }
+  'external'         { SourceToken _ (TokLowerName [] "external") }
   'hiding'           { SourceToken _ (TokLowerName [] "hiding") }
   'import'           { SourceToken _ (TokLowerName [] "import") }
   'if'               { SourceToken _ (TokLowerName [] "if") }
@@ -670,7 +671,8 @@ decl :: { Declaration () }
   | ident '::' type { DeclSignature () (Labeled $1 $2 $3) }
   | ident manyOrEmpty(binderAtom) guardedDecl { DeclValue () (ValueBindingFields $1 $2 $3) }
   | fixity { DeclFixity () $1 }
-  | 'foreign' 'import' ident '::' type {% when (isConstrained $5) (addFailure ([$1, $2, nameTok $3, $4] <> toList (flattenType $5)) ErrConstraintInForeignImportSyntax) *> pure (DeclForeign () $1 $2 (ForeignValue (Labeled $3 $4 $5))) }
+  | 'foreign' 'import' foreignLocation ident '::' type {% when (isConstrained $6) (addFailure ([$1, $2] <> toList (flattenForeignLoc $3) <> [nameTok $4, $5] <> toList (flattenType $6)) ErrConstraintInForeignImportSyntax) *> pure (DeclForeign () $1 $2 (ForeignValue (Just $3) (Labeled $4 $5 $6))) }
+  | 'foreign' 'import' ident '::' type {% when (isConstrained $5) (addFailure ([$1, $2, nameTok $3, $4] <> toList (flattenType $5)) ErrConstraintInForeignImportSyntax) *> pure (DeclForeign () $1 $2 (ForeignValue Nothing (Labeled $3 $4 $5))) }
   | 'foreign' 'import' 'data' properName '::' type { DeclForeign () $1 $2 (ForeignData $3 (Labeled (getProperName $4) $5 $6)) }
   | 'type' 'role' properName many(role) { DeclRole () $1 $2 (getProperName $3) $4 }
 
@@ -764,6 +766,11 @@ role :: { Role }
   : 'nominal' { Role $1 R.Nominal }
   | 'representational' { Role $1 R.Representational }
   | 'phantom' { Role $1 R.Phantom }
+
+foreignLocation :: { ForeignLocation }
+  : '@' string { ForeignLocLocal $1 $2 }
+  | '@' 'module' string { ForeignLocModule $1 $2 $3}
+  | '@' 'external' { ForeignLocExternal $1 $2 }
 
 -- Partial parsers which can be combined with combinators for adhoc use. We need
 -- to revert the lookahead token so that it doesn't consume an extra token

@@ -307,10 +307,16 @@ data PatternGuard a = PatternGuard
   } deriving (Show, Eq, Ord, Functor, Foldable, Traversable, Generic)
 
 data Foreign a
-  = ForeignValue (Labeled (Name Ident) (Type a))
+  = ForeignValue (Maybe ForeignLocation) (Labeled (Name Ident) (Type a))
   | ForeignData SourceToken (Labeled (Name (N.ProperName 'N.TypeName)) (Type a))
   | ForeignKind SourceToken (Name (N.ProperName 'N.TypeName))
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable, Generic)
+
+data ForeignLocation
+  = ForeignLocLocal SourceToken (SourceToken, PSString)
+  | ForeignLocModule SourceToken SourceToken (SourceToken, PSString) 
+  | ForeignLocExternal SourceToken SourceToken
+  deriving (Show, Eq, Ord, Generic)
 
 data Role = Role
   { roleTok :: SourceToken
